@@ -1,0 +1,171 @@
+|-- .bundle
+    |-- config
+|-- .eslintrc.js
+|-- .gitignore
+|-- .prettierrc.js
+|-- .watchmanconfig
+|-- android
+    |-- .gradle
+        |-- 8.8
+            |-- checksums
+                |-- checksums.lock
+                |-- md5-checksums.bin
+                |-- sha1-checksums.bin
+            |-- dependencies-accessors
+                |-- 569c8b261a8a714d7731d5f568e0e5c05babae10
+                    |-- classes
+                        |-- org
+                            |-- gradle
+                                |-- accessors
+                                    |-- dm
+                                        |-- LibrariesForLibs$AndroidGradleLibraryAccessors.class
+                                        |-- LibrariesForLibs$AndroidLibraryAccessors.class
+                                        |-- LibrariesForLibs$BundleAccessors.class
+                                        |-- LibrariesForLibs$KotlinGradleLibraryAccessors.class
+                                        |-- LibrariesForLibs$KotlinLibraryAccessors.class
+                                        |-- LibrariesForLibs$KotlinPluginAccessors.class
+                                        |-- LibrariesForLibs$PluginAccessors.class
+                                        |-- LibrariesForLibs$VersionAccessors.class
+                                        |-- LibrariesForLibs.class
+                                        |-- LibrariesForLibsInPluginsBlock$AndroidGradleLibraryAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$AndroidLibraryAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$BundleAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$KotlinGradleLibraryAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$KotlinLibraryAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$KotlinPluginAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$PluginAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock$VersionAccessors.class
+                                        |-- LibrariesForLibsInPluginsBlock.class
+                    |-- metadata.bin
+                    |-- sources
+                        |-- org
+                            |-- gradle
+                                |-- accessors
+                                    |-- dm
+                                        |-- LibrariesForLibs.java
+                                        |-- LibrariesForLibsInPluginsBlock.java
+                |-- gc.properties
+            |-- executionHistory
+                |-- executionHistory.bin
+                |-- executionHistory.lock
+            |-- expanded
+            |-- fileChanges
+                |-- last-build.bin
+            |-- fileHashes
+                |-- fileHashes.bin
+                |-- fileHashes.lock
+                |-- resourceHashesCache.bin
+            |-- gc.properties
+            |-- vcsMetadata
+        |-- buildOutputCleanup
+            |-- buildOutputCleanup.lock
+            |-- cache.properties
+            |-- outputFiles.bin
+        |-- file-system.probe
+        |-- kotlin
+            |-- errors
+            |-- sessions
+        |-- noVersion
+            |-- buildLogic.lock
+        |-- vcs-1
+            |-- gc.properties
+    |-- app
+        |-- build.gradle
+        |-- debug.keystore
+        |-- proguard-rules.pro
+        |-- src
+            |-- debug
+                |-- AndroidManifest.xml
+            |-- main
+                |-- AndroidManifest.xml
+                |-- java
+                    |-- com
+                        |-- app
+                            |-- MainActivity.kt
+                            |-- MainApplication.kt
+                |-- res
+                    |-- drawable
+                        |-- rn_edit_text_material.xml
+                    |-- mipmap-hdpi
+                        |-- ic_launcher.png
+                        |-- ic_launcher_round.png
+                    |-- mipmap-mdpi
+                        |-- ic_launcher.png
+                        |-- ic_launcher_round.png
+                    |-- mipmap-xhdpi
+                        |-- ic_launcher.png
+                        |-- ic_launcher_round.png
+                    |-- mipmap-xxhdpi
+                        |-- ic_launcher.png
+                        |-- ic_launcher_round.png
+                    |-- mipmap-xxxhdpi
+                        |-- ic_launcher.png
+                        |-- ic_launcher_round.png
+                    |-- values
+                        |-- strings.xml
+                        |-- styles.xml
+    |-- build.gradle
+    |-- gradle
+        |-- wrapper
+            |-- gradle-wrapper.jar
+            |-- gradle-wrapper.properties
+    |-- gradle.properties
+    |-- gradlew
+    |-- gradlew.bat
+    |-- settings.gradle
+|-- api
+    |-- api.ts
+|-- app.json
+|-- App.tsx
+|-- babel.config.js
+|-- components
+    |-- Loader.tsx
+|-- Gemfile
+|-- index.js
+|-- ios
+    |-- .xcode.env
+    |-- app
+        |-- AppDelegate.h
+        |-- AppDelegate.mm
+        |-- Images.xcassets
+            |-- AppIcon.appiconset
+                |-- Contents.json
+            |-- Contents.json
+        |-- Info.plist
+        |-- LaunchScreen.storyboard
+        |-- main.m
+        |-- PrivacyInfo.xcprivacy
+    |-- app.xcodeproj
+        |-- project.pbxproj
+        |-- xcshareddata
+            |-- xcschemes
+                |-- app.xcscheme
+    |-- appTests
+        |-- appTests.m
+        |-- Info.plist
+    |-- Podfile
+|-- jest.config.js
+|-- metro.config.js
+|-- navigation
+    |-- AuthStack.tsx
+|-- package-lock.json
+|-- package.json
+|-- README.md
+|-- redux
+    |-- slices
+        |-- authSlice.ts
+    |-- store.ts
+|-- screens
+    |-- AdminDashboard.tsx
+    |-- BuyerHome.tsx
+    |-- BuyerSignupScreen.tsx
+    |-- HelloScreen.tsx
+    |-- InitialScreen.tsx
+    |-- LoginScreen.tsx
+    |-- SellerHome.tsx
+    |-- SellerSignupScreen.tsx
+    |-- SignupScreen.tsx
+    |-- WriteOTPScreen.tsx
+|-- tsconfig.json
+|-- __tests__
+    |-- App.test.tsx
