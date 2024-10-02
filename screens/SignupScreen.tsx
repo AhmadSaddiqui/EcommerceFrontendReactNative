@@ -1,22 +1,61 @@
-import { NavigationProp } from '@react-navigation/native';
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
+import { NavigationProp } from '@react-navigation/native';
+import Button from '../components/Button'; // Import your custom Button component
 
 interface SignupScreenProps {
-  navigation: NavigationProp<any>; // Define the type for navigation prop
+  navigation: NavigationProp<any>;
 }
 
 const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
+  // Animation state
+  const buttonScale = new Animated.Value(1);
+
+  const animateButton = () => {
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 0.95,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleButtonPress = (route: string) => {
+    animateButton();
+    // Delay navigation to ensure animation completes
+    setTimeout(() => {
+      navigation.navigate(route);
+    }, 150);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <Button title="Register as Buyer" onPress={() => navigation.navigate('BuyerSignup')} />
+        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+          <Button onPress={() => handleButtonPress('BuyerSignup')}>
+            Register as Buyer
+          </Button>
+        </Animated.View>
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Register as Seller" onPress={() => navigation.navigate('SellerSignup')} />
+        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+          <Button onPress={() => handleButtonPress('SellerSignup')}>
+            Register as Seller
+          </Button>
+        </Animated.View>
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Login" onPress={() => navigation.navigate('Login')} />
+        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+          <Button onPress={() => handleButtonPress('Login')}>
+            Login
+          </Button>
+        </Animated.View>
       </View>
     </View>
   );
@@ -27,10 +66,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000000', // Set the background color to black
   },
   buttonContainer: {
-    width: '80%', // Adjusts button width
-    marginVertical: 10, // Adds space between the buttons
+    width: '80%',
+    marginVertical: 10,
   },
 });
 

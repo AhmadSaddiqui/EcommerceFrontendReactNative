@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../redux/store'; // Use typed dispatch and selector
-import { verifyOTP } from '../redux/slices/authSlice'; // You will need to add this thunk
+import { verifyOTP } from '../redux/slices/authSlice'; // Ensure this thunk is implemented
 import { NavigationProp } from '@react-navigation/native';
 
-interface OTPVerificationProps {
+interface OTPProps {
   navigation: NavigationProp<any>;
   route: { params: { email: string; role: string } }; // Email and role passed from registration
 }
 
-const OTPVerificationScreen: React.FC<OTPVerificationProps> = ({ navigation, route }) => {
-  const { email, role } = route.params; // Get email and role from route params
+  const OTP: React.FC<OTPProps> = ({ navigation, route }) => {
+  const { email, role } = route.params; 
   const [otp, setOtp] = useState('');
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth); // Select auth state
@@ -45,6 +45,7 @@ const OTPVerificationScreen: React.FC<OTPVerificationProps> = ({ navigation, rou
         onChangeText={setOtp}
         keyboardType="number-pad"
         autoCapitalize="none"
+        editable={!loading} // Disable input when loading
       />
 
       {/* Display error message */}
@@ -88,4 +89,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OTPVerificationScreen;
+export default OTP;

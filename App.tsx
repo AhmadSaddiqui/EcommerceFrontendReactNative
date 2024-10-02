@@ -12,6 +12,9 @@ import { store } from './redux/store';
 import BuyerHome from './screens/BuyerHome';
 import SignupScreen from './screens/SignupScreen';
 import HelloScreen from './screens/HelloScreen';
+import ProductListScreen from './screens/ProductListScreen';
+import ProductDetailsScreen from './screens/ProductDetailsScreen';
+import CartScreen from './screens/CartScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,11 +28,14 @@ const App: React.FC = () => {
           <Stack.Screen name="SellerSignup" component={SellerSignupScreen} options={{ title: 'Seller Signup' }} />
           <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Login' }} />
           <Stack.Screen name="Hello" component={HelloScreen} />
-         
+          <Stack.Screen name="ProductList" component={ProductListScreen} />
+          <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+          <Stack.Screen name="CartScreen" component={CartScreen} />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
-  );
+  );  
 };
 
 export default App;
