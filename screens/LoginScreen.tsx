@@ -53,7 +53,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
-        placeholderTextColor="#aaa" // Light gray placeholder text
+        placeholderTextColor="#aaa" 
       />
       <TextInput
         style={styles.input}
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#000000', // Set the background color to black
+    backgroundColor: '#000000', 
   },
   input: {
     width: '100%',

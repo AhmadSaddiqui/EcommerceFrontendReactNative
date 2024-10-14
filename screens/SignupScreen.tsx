@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import Button from '../components/Button'; // Import your custom Button component
+import Button from '../components/Button'; 
 
 interface SignupScreenProps {
   navigation: NavigationProp<any>;

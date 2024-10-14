@@ -15,6 +15,7 @@ import HelloScreen from './screens/HelloScreen';
 import ProductListScreen from './screens/ProductListScreen';
 import ProductDetailsScreen from './screens/ProductDetailsScreen';
 import CartScreen from './screens/CartScreen';
+import AdminDashboard from './screens/AdminDashboard';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,8 @@ const App: React.FC = () => {
           <Stack.Screen name="ProductList" component={ProductListScreen} />
           <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
           <Stack.Screen name="CartScreen" component={CartScreen} />
+          <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+
           
         </Stack.Navigator>
       </NavigationContainer>

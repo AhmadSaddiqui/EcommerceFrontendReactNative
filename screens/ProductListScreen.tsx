@@ -7,11 +7,13 @@ import {
   StyleSheet, 
   ActivityIndicator, 
   Image, 
-  TextInput 
+  TextInput,
+  Alert
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { fetchProducts, searchProductsByName } from '../redux/slices/authSlice'; // Ensure correct import
 import { NavigationProp } from '@react-navigation/native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import image picker
 
 interface ProductListProps {
   navigation: NavigationProp<any>;
@@ -19,8 +21,9 @@ interface ProductListProps {
 
 const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
-  const { products, loading, error } = useAppSelector((state) => state.auth);
+  const { products, filteredProducts, loading, error } = useAppSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); // State to hold the image URI
 
   useEffect(() => {
     dispatch(fetchProducts()); // Fetch products when the component mounts
@@ -33,6 +36,60 @@ const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
     } else {
       dispatch(fetchProducts()); // Fetch all products if search query is empty
     }
+  };
+
+  // Function to handle image selection
+  const handleImagePicker = () => {
+    Alert.alert(
+      'Select Image',
+      'Choose an option to upload image',
+      [
+        { text: 'Camera', onPress: openCamera },
+        { text: 'Gallery', onPress: openGallery },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  // Open camera
+  const openCamera = () => {
+    launchCamera(
+      {
+        mediaType: 'photo',
+        cameraType: 'back',
+        saveToPhotos: true,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+        } else if (response.errorCode) {
+          console.log('Camera error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const imageUri = response.assets[0].uri ? response.assets[0].uri : null; // Handle potential undefined
+          setSelectedImage(imageUri); // Set the image URI if available
+        }
+      }
+    );
+  };
+  
+  // Open image gallery
+  const openGallery = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled gallery');
+        } else if (response.errorCode) {
+          console.log('Gallery error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const imageUri = response.assets[0].uri ? response.assets[0].uri : null; // Handle potential undefined
+          setSelectedImage(imageUri); // Set the image URI if available
+        }
+      }
+    );
   };
 
   const renderItem = ({ item }: any) => (
@@ -59,6 +116,9 @@ const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
     return <Text style={styles.errorText}>{error}</Text>;
   }
 
+  // Use `filteredProducts` if search query exists, otherwise use `products`
+  const dataToRender = searchQuery.trim() ? filteredProducts : products;
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -76,8 +136,17 @@ const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
           <Text style={styles.cartButtonText}>Go to Cart</Text>
         </TouchableOpacity>
       </View>
+      
+      <TouchableOpacity style={styles.imageUploadButton} onPress={handleImagePicker}>
+        <Text style={styles.imageUploadText}>Upload Image</Text>
+      </TouchableOpacity>
+      
+      {selectedImage && (
+        <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+      )}
+
       <FlatList
-        data={products}
+        data={dataToRender} // Render search results or all products
         renderItem={renderItem}
         keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
         numColumns={2}
@@ -123,6 +192,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  imageUploadButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  imageUploadText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  selectedImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 15,
   },
   listContainer: {
     justifyContent: 'space-between',

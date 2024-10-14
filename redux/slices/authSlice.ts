@@ -8,6 +8,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   products: any[];
+  filteredProducts: any[]; // Add a separate list for filtered search results
   cart: any[];
   order: any | null;
 }
@@ -17,6 +18,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   products: [],
+  filteredProducts: [], // Empty filtered product list initially
   cart: [],
   order: null,
 };
@@ -86,25 +88,26 @@ export const fetchProducts = createAsyncThunk('buyer/fetchProducts', async (_, t
 });
 
 // Async thunk for searching products by name
-export const searchProductsByName = createAsyncThunk('buyer/searchProductsByName', async (title: string, thunkAPI) => {
-  try {
-    const response = await api.get(`/products/name/${title}`);
-    return response.data; // Assuming the response returns the list of matching products
-  } catch (error) {
-    return thunkAPI.rejectWithValue('Failed to search products');
+export const searchProductsByName = createAsyncThunk(
+  'buyer/searchProductsByName',
+  async (title: string, thunkAPI) => {
+    try {
+      const response = await api.get(`/products/name/${title}`);
+      return response.data; // Assuming the response returns the list of matching products
+    } catch (error) {
+      return thunkAPI.rejectWithValue('Failed to search products');
+    }
   }
-});
+);
 
 // Async thunk for adding product to the cart
 export const addToCart = createAsyncThunk(
   'buyer/addToCart',
   async ({ product, quantity }: { product: string; quantity: number }, thunkAPI) => {
     try {
-      // Make a POST request to add the product to the cart
       const response = await api.post(`/cart/add`, { product, quantity }); // Adjusted field name from productId to product
       return response.data; // Return the updated cart
     } catch (error) {
-      // Handle errors here
       return thunkAPI.rejectWithValue('Failed to add product to cart');
     }
   }
@@ -119,6 +122,8 @@ export const fetchCart = createAsyncThunk('buyer/fetchCart', async (_, thunkAPI)
     return thunkAPI.rejectWithValue('Failed to fetch cart');
   }
 });
+
+// Async thunk for removing an item from the cart
 export const removeFromCart = createAsyncThunk(
   'buyer/removeFromCart',
   async ({ buyerId, productId }: { buyerId: string; productId: string }, thunkAPI) => {
@@ -148,9 +153,13 @@ const authSlice = createSlice({
     logout: (state) => {
       state.token = null;
       state.products = [];
+      state.filteredProducts = []; // Clear the filtered products on logout
       state.cart = [];
       state.order = null;
       AsyncStorage.removeItem('token');
+    },
+    clearSearchResults: (state) => {
+      state.filteredProducts = [];
     },
   },
   extraReducers: (builder) => {
@@ -168,7 +177,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Seller registration reducers
       .addCase(registerSeller.pending, (state) => {
         state.loading = true;
@@ -181,7 +190,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Buyer registration reducers
       .addCase(registerBuyer.pending, (state) => {
         state.loading = true;
@@ -229,7 +238,7 @@ const authSlice = createSlice({
       })
       .addCase(searchProductsByName.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload; // Update the products with the search results
+        state.filteredProducts = action.payload; // Update with search results
       })
       .addCase(searchProductsByName.rejected, (state, action) => {
         state.loading = false;
@@ -264,6 +273,20 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // Remove from cart reducers
+      .addCase(removeFromCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeFromCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cart = action.payload; // Update cart after removal
+      })
+      .addCase(removeFromCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       // Place order reducers
       .addCase(placeOrder.pending, (state) => {
         state.loading = true;
@@ -276,22 +299,10 @@ const authSlice = createSlice({
       .addCase(placeOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      })
-      .addCase(removeFromCart.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(removeFromCart.fulfilled, (state, action) => {
-        state.loading = false;
-        state.cart = action.payload; // Update cart after removal
-      })
-      .addCase(removeFromCart.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearSearchResults } = authSlice.actions;
 
 export default authSlice.reducer;
