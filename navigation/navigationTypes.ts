@@ -6,7 +6,7 @@ export type RootStackParamList = {
     SellerSignup: undefined; // No params
     Login: undefined; // No params
     BuyerHome: undefined; // No params
-    SellerHome: undefined; // No params
+    SellerHomes: undefined; // No params
     AdminDashboard: undefined; // No params
     ProductList: undefined;
     ProductDetailsScreen: { product: { id: string; name: string; description: string; price: number } };

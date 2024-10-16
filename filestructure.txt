@@ -146,6 +146,7 @@
         |-- Info.plist
     |-- Podfile
 |-- jest.config.js
+|-- key
 |-- metro.config.js
 |-- navigation
     |-- AuthStack.tsx
@@ -168,7 +169,7 @@
     |-- OTP.tsx
     |-- ProductDetailsScreen.tsx
     |-- ProductListScreen.tsx
-    |-- SellerHome.tsx
+    |-- SellerHomes.tsx
     |-- SellerSignupScreen.tsx
     |-- SignupScreen.tsx
 |-- tsconfig.json

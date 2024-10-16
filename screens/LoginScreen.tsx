@@ -30,7 +30,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (role === 'buyer') {
         navigation.navigate('ProductList');
       } else if (role === 'seller') {
-        navigation.navigate('SellerHome');
+        navigation.navigate('AdminDashboard');
       } else if (role === 'admin') {
         navigation.navigate('AdminDashboard');
       }

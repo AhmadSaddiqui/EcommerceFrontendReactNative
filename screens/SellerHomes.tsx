@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const SellerHome = () => {
+const SellerHomes = () => {
   return (
     <View style={styles.container}>
       <Text>Welcome Seller!</Text>
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SellerHome;
+export default SellerHomes;

@@ -1,44 +1,63 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ActivityIndicator, 
-  Image, 
-  TextInput,
-  Alert
-} from 'react-native';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { fetchProducts, searchProductsByName } from '../redux/slices/authSlice'; // Ensure correct import
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Alert, StyleSheet } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // Import image picker
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Use your Imagga API Key and Secret
+const imaggaApiKey = 'acc_2d1b8c44c6a251d';
+const imaggaApiSecret = 'a4bece68eb91e737f351872f7b5a7087';
 
 interface ProductListProps {
   navigation: NavigationProp<any>;
 }
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+}
+
 const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
-  const dispatch = useAppDispatch();
-  const { products, filteredProducts, loading, error } = useAppSelector((state) => state.auth);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null); // State to hold the image URI
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch all products when component mounts
   useEffect(() => {
-    dispatch(fetchProducts()); // Fetch products when the component mounts
-  }, [dispatch]);
+    const fetchAllProducts = async () => {
+      setLoading(true);
+      try {
+        // Retrieve token from AsyncStorage
+        const token = await AsyncStorage.getItem('token');
+        console.log('Token used for fetching products:', token); // Debugging token
 
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    if (text.trim()) {
-      dispatch(searchProductsByName(text.trim())); // Dispatch search action when there's input
-    } else {
-      dispatch(fetchProducts()); // Fetch all products if search query is empty
-    }
-  };
+        // Fetch all products
+        const response = await axios.get('http://10.0.2.2:3000/products', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass token in Authorization header
+          },
+        });
 
-  // Function to handle image selection
+        if (response.data) {
+          setProducts(response.data); // Set fetched products
+        } else {
+          setError('No products found');
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Error fetching products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllProducts();
+  }, []);
+
   const handleImagePicker = () => {
     Alert.alert(
       'Select Image',
@@ -52,59 +71,116 @@ const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
     );
   };
 
-  // Open camera
   const openCamera = () => {
-    launchCamera(
-      {
-        mediaType: 'photo',
-        cameraType: 'back',
-        saveToPhotos: true,
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled camera');
-        } else if (response.errorCode) {
-          console.log('Camera error: ', response.errorMessage);
-        } else if (response.assets && response.assets.length > 0) {
-          const imageUri = response.assets[0].uri ? response.assets[0].uri : null; // Handle potential undefined
-          setSelectedImage(imageUri); // Set the image URI if available
-        }
+    launchCamera({ mediaType: 'photo' }, response => {
+      if (response.assets && response.assets.length > 0) {
+        const imageUri = response.assets[0]?.uri ?? null;
+        setSelectedImage(imageUri);
+        handleGenerateTags(imageUri);
       }
-    );
-  };
-  
-  // Open image gallery
-  const openGallery = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled gallery');
-        } else if (response.errorCode) {
-          console.log('Gallery error: ', response.errorMessage);
-        } else if (response.assets && response.assets.length > 0) {
-          const imageUri = response.assets[0].uri ? response.assets[0].uri : null; // Handle potential undefined
-          setSelectedImage(imageUri); // Set the image URI if available
-        }
-      }
-    );
+    });
   };
 
-  const renderItem = ({ item }: any) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() => navigation.navigate('ProductDetails', { product: item })} // Navigate to product details
-    >
-      {item.image && ( // Check if image exists and render it
-        <Image
-          source={{ uri: `data:image/png;base64,${item.image}` }} // Assuming the image is stored as base64
-          style={styles.productImage}
-        />
-      )}
+  const openGallery = () => {
+    launchImageLibrary({ mediaType: 'photo' }, response => {
+      if (response.assets && response.assets.length > 0) {
+        const imageUri = response.assets[0]?.uri ?? null;
+        setSelectedImage(imageUri);
+        handleGenerateTags(imageUri);
+      }
+    });
+  };
+
+  const handleGenerateTags = async (imageUri: string | null) => {
+    if (!imageUri) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Convert image to base64
+      const base64Image = await uriToBase64(imageUri);
+
+      // Send base64 image to Imagga API to generate tags
+      const tagsResponse = await generateTagsFromImagga(base64Image);
+
+      const tags = tagsResponse.result.tags.map((tag: any) => tag.tag.en);
+      console.log('Generated Tags:', tags); 
+      // After generating tags, proceed to search products by these tags
+      handleSearchByTags(tags);
+
+    } catch (err) {
+      console.error('Error generating tags from image:', err);
+      setError('Error generating tags');
+      setLoading(false);
+    }
+  };
+
+  const generateTagsFromImagga = async (base64Image: string) => {
+    const apiUrl = 'https://api.imagga.com/v2/tags';
+    const authHeader = 'Basic ' + btoa(`${imaggaApiKey}:${imaggaApiSecret}`);
+
+    const formData = new FormData();
+    formData.append('image_base64', base64Image);
+
+    const response = await axios.post(apiUrl, formData, {
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  };
+
+  const handleSearchByTags = async (tags: string[]) => {
+    try {
+      // Retrieve token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      console.log('Token used for search:', token); // Debugging token
+
+      // Search products by tags (adding the token in the request header)
+      const productsResponse = await axios.get('http://10.0.2.2:3000/products/search/tags', {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pass token in Authorization header
+        },
+        params: { tags },
+      });
+
+      if (productsResponse.data) {
+        setProducts(productsResponse.data); // Update products with search results
+      } else {
+        setError('No products found');
+      }
+    } catch (err) {
+      console.error('Error searching products by tags:', err);
+      setError('Error searching products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uriToBase64 = async (uri: string): Promise<string> => {
+    return new Promise<string>((resolve, reject) => {
+      fetch(uri)
+        .then(response => response.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        })
+        .catch(error => reject(error));
+    });
+  };
+
+  const renderItem = ({ item }: { item: Product }) => (
+    <TouchableOpacity style={styles.productCard} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
+      {item.image && <Image source={{ uri: `data:image/png;base64,${item.image}` }} style={styles.productImage} />}
       <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+      {/* Ensure price is defined and is a number before calling toFixed */}
+      <Text style={styles.productPrice}>
+        {item.price !== undefined && !isNaN(item.price) ? `$${item.price.toFixed(2)}` : 'Price not available'}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -116,141 +192,83 @@ const ProductListScreen: React.FC<ProductListProps> = ({ navigation }) => {
     return <Text style={styles.errorText}>{error}</Text>;
   }
 
-  // Use `filteredProducts` if search query exists, otherwise use `products`
-  const dataToRender = searchQuery.trim() ? filteredProducts : products;
-
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by product name"
-          value={searchQuery}
-          onChangeText={handleSearch}
-          placeholderTextColor="#aaa" // Light gray placeholder text
-        />
-        <TouchableOpacity 
-          style={styles.cartButton}
-          onPress={() => navigation.navigate('CartScreen')} // Navigate to cart screen
-        >
-          <Text style={styles.cartButtonText}>Go to Cart</Text>
-        </TouchableOpacity>
-      </View>
-      
       <TouchableOpacity style={styles.imageUploadButton} onPress={handleImagePicker}>
-        <Text style={styles.imageUploadText}>Upload Image</Text>
+        <Text style={styles.imageUploadText}>Upload Image to Search</Text>
       </TouchableOpacity>
-      
-      {selectedImage && (
-        <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-      )}
+
+      {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
 
       <FlatList
-        data={dataToRender} // Render search results or all products
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        contentContainerStyle={styles.listContainer}
-      />
+  data={products}
+  renderItem={renderItem}
+  keyExtractor={(item, index) => item.id ? item.id : index.toString()} // Use index as fallback if item.id is missing or not unique
+  numColumns={2}
+  columnWrapperStyle={styles.columnWrapper}
+  contentContainerStyle={styles.listContainer}
+/>
+
     </View>
   );
 };
 
+export default ProductListScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
-    backgroundColor: '#F7F9FC', // Light background for better contrast
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between', // Add space between search input and cart button
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc', // Add a bottom border for separation
-    paddingBottom: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 45,
-    borderColor: '#007BFF', // Blue border color
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff', // White input background for better contrast
-  },
-  cartButton: {
-    marginLeft: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#007BFF', // Button color
-    borderRadius: 5,
-  },
-  cartButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    padding: 10,
   },
   imageUploadButton: {
     backgroundColor: '#007BFF',
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     marginBottom: 10,
     alignItems: 'center',
   },
   imageUploadText: {
-    color: '#fff',
-    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
   selectedImage: {
     width: '100%',
     height: 200,
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-  listContainer: {
-    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   productCard: {
     flex: 1,
-    padding: 15,
     margin: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10, // Rounded corners
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: 'white',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    elevation: 2, // Shadow effect for better depth
   },
   productImage: {
-    width: '100%',
-    height: 120,
+    width: 100,
+    height: 100,
     marginBottom: 10,
-    resizeMode: 'cover',
-    borderRadius: 10, // Rounded corners for images
   },
   productName: {
-    fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333', // Darker text color for better readability
+    marginBottom: 5,
   },
   productPrice: {
-    fontSize: 14,
-    color: '#555',
+    color: '#007BFF',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
     color: 'red',
     textAlign: 'center',
   },
+  listContainer: {
+    paddingBottom: 20,
+  },
   columnWrapper: {
     justifyContent: 'space-between',
   },
-  loader: {
-    marginTop: 20,
-  },
 });
-
-export default ProductListScreen;

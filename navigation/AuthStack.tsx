@@ -8,7 +8,7 @@ import BuyerSignupScreen from '../screens/BuyerSignupScreen';
 import SellerSignupScreen from '../screens/SellerSignupScreen';
 import LoginScreen from '../screens/LoginScreen';
 import BuyerHome from '../screens/BuyerHome';
-import SellerHome from '../screens/SellerHome';
+import SellerHomes from '../screens/SellerHomes';
 import AdminDashboard from '../screens/AdminDashboard';
 import ProductDetailsScreen from '../screens/ProductDetailsScreen';
 import ProductListScreen from '../screens/ProductListScreen';
@@ -25,7 +25,7 @@ const AuthStack = () => {
       <Stack.Screen name="SellerSignup" component={SellerSignupScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="BuyerHome" component={BuyerHome} />
-      <Stack.Screen name="SellerHome" component={SellerHome} />
+      <Stack.Screen name="SellerHomes" component={SellerHomes} />
       <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
       <Stack.Screen name="ProductList" component={ProductListScreen} />
       <Stack.Screen name="ProductDetailsScreen" component={ProductDetailsScreen} />
