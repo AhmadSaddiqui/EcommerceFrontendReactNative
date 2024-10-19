@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const AdminDashboard = () => {
   return (
     <View style={styles.container}>
-      <Text>Welcome Admin!</Text>
+      <Text>Welcome Seller!</Text>
     </View>
   );
 };
